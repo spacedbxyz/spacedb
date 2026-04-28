@@ -61,3 +61,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+apps/api/tsconfig.tsbuildinfo
+apps/api/tsconfig.build.tsbuildinfo
