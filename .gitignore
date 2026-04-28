@@ -5,35 +5,59 @@ node_modules
 .pnp
 .pnp.js
 
-# Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Testing
-coverage
+# Build outputs
+dist
+build
+out
+.cache
 
 # Turbo
 .turbo
 
-# Vercel
-.vercel
+# Tests
+coverage
+.nyc_output
 
-# Build Outputs
-.next/
-out/
-build
-dist
-
-
-# Debug
+# Logs
+logs
+*.log
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-# Misc
+# Env
+.env
+.env.*
+!.env.example
+
+# Runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Temp
+.temp
+.tmp
+
+# OS
 .DS_Store
 *.pem
-/.idea
+
+# Editors
+.idea
+.fleet
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

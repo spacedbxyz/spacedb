@@ -1,0 +1,7 @@
+.output
+.nuxt
+.nitro
+.data
+
+# Vercel
+.vercel

@@ -5,17 +5,38 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", ".output/**", ".nuxt/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "lint": {
+      "cache": false
+    },
+    "lint:check": {
+      "dependsOn": ["^lint:check"],
+      "inputs": ["$TURBO_DEFAULT$", "eslint.config.*", ".eslintrc*"],
+      "outputs": []
+    },
+    "format": {
+      "cache": false
+    },
+    "format:check": {
+      "inputs": ["$TURBO_DEFAULT$", ".prettierrc*", ".prettierignore"],
+      "outputs": []
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig*.json"],
+      "outputs": []
+    },
+    "check": {
+      "dependsOn": ["format:check", "lint:check"]
+    },
+    "fix": {
+      "cache": false,
+      "dependsOn": ["format", "lint"]
     }
   }
 }
