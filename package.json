@@ -3,18 +3,28 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "pnpm infra:up && dotenv -e .env -- turbo run dev",
     "lint": "turbo run lint",
     "lint:check": "turbo run lint:check",
     "format": "turbo run format",
     "format:check": "turbo run format:check",
     "check-types": "turbo run check-types",
     "check": "turbo run check",
-    "fix": "turbo run fix"
+    "fix": "turbo run fix",
+    "infra:up": "docker compose up -d --wait",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f",
+    "infra:reset": "docker compose down -v",
+    "docker:build": "docker compose --profile full build",
+    "docker:up": "docker compose --profile full up -d --wait",
+    "docker:down": "docker compose --profile full down",
+    "docker:logs": "docker compose --profile full logs -f",
+    "deploy": "docker compose -f docker-compose.yml up -d --build --wait"
   },
   "devDependencies": {
+    "dotenv-cli": "^11.0.0",
     "turbo": "^2.9.6",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

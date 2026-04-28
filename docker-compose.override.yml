@@ -1,0 +1,21 @@
+name: ${STACK_NAME:-spacedb}
+
+services:
+  api:
+    profiles: [full]
+    ports:
+      - "${API_PORT:-3000}:3000"
+
+  web:
+    profiles: [full]
+    ports:
+      - "${WEB_PORT:-3001}:3000"
+
+  postgres:
+    ports:
+      - "${API_DATABASE_PORT:-5432}:5432"
+
+  minio:
+    ports:
+      - "${API_MINIO_PORT:-9000}:9000"
+      - "${API_MINIO_CONSOLE_PORT:-9001}:9001"

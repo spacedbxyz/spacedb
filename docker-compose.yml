@@ -1,0 +1,116 @@
+name: ${STACK_NAME:-spacedb}
+
+services:
+  api:
+    image: ${IMAGE_NAME:-spacedb}/api:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runner
+    environment:
+      API_PORT: ${API_PORT}
+      API_HOST: ${API_HOST}
+      API_DATABASE_HOST: postgres
+      API_DATABASE_PORT: "5432"
+      API_DATABASE_USERNAME: ${API_DATABASE_USERNAME}
+      API_DATABASE_PASSWORD: ${API_DATABASE_PASSWORD}
+      API_DATABASE_NAME: ${API_DATABASE_NAME}
+      API_MINIO_ENDPOINT: minio
+      API_MINIO_PORT: "9000"
+      API_MINIO_USE_SSL: "false"
+      API_MINIO_ACCESS_KEY: ${API_MINIO_ACCESS_KEY}
+      API_MINIO_SECRET_KEY: ${API_MINIO_SECRET_KEY}
+      API_MINIO_BUCKET: ${API_MINIO_BUCKET}
+    networks: [traefik]
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio:    { condition: service_healthy }
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK}
+      - traefik.http.routers.${STACK_NAME:-spacedb}-api.rule=Host(`${API_DOMAIN}`)
+      - traefik.http.routers.${STACK_NAME:-spacedb}-api.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.${STACK_NAME:-spacedb}-api.tls.certresolver=${TRAEFIK_CERT_RESOLVER}
+      - traefik.http.services.${STACK_NAME:-spacedb}-api.loadbalancer.server.port=3000
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  web:
+    image: ${IMAGE_NAME:-spacedb}/web:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: runner
+    environment:
+      WEB_HOST: 0.0.0.0
+      WEB_PORT: "3000"
+      WEB_API_BASE: http://api:3000
+    networks: [traefik]
+    depends_on:
+      api: { condition: service_healthy }
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK}
+      - traefik.http.routers.${STACK_NAME:-spacedb}-web.rule=Host(`${WEB_DOMAIN}`)
+      - traefik.http.routers.${STACK_NAME:-spacedb}-web.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.${STACK_NAME:-spacedb}-web.tls.certresolver=${TRAEFIK_CERT_RESOLVER}
+      - traefik.http.services.${STACK_NAME:-spacedb}-web.loadbalancer.server.port=3000
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${API_DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${API_DATABASE_PASSWORD}
+      POSTGRES_DB: ${API_DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${API_DATABASE_USERNAME} -d ${API_DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${API_MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${API_MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    networks: [traefik]
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK}
+      - traefik.http.routers.${STACK_NAME:-spacedb}-minio-console.rule=Host(`${MINIO_CONSOLE_DOMAIN}`)
+      - traefik.http.routers.${STACK_NAME:-spacedb}-minio-console.entrypoints=${TRAEFIK_ENTRYPOINT}
+      - traefik.http.routers.${STACK_NAME:-spacedb}-minio-console.tls.certresolver=${TRAEFIK_CERT_RESOLVER}
+      - traefik.http.routers.${STACK_NAME:-spacedb}-minio-console.service=${STACK_NAME:-spacedb}-minio-console
+      - traefik.http.services.${STACK_NAME:-spacedb}-minio-console.loadbalancer.server.port=9001
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  traefik:
+    name: ${TRAEFIK_NETWORK:-traefik}
