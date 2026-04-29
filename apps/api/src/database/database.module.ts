@@ -1,0 +1,52 @@
+import { Global, Inject, Module, type OnModuleDestroy } from '@nestjs/common';
+import { ConfigService, type ConfigType } from '@nestjs/config';
+import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import postgres, { type Sql } from 'postgres';
+
+import type databaseConfig from '../config/database.config';
+
+import * as schema from './schema';
+
+export const DRIZZLE = Symbol('DRIZZLE');
+export const PG_CLIENT = Symbol('PG_CLIENT');
+
+export type Database = PostgresJsDatabase<typeof schema>;
+
+type Env = { database: ConfigType<typeof databaseConfig> };
+
+@Global()
+@Module({
+  providers: [
+    {
+      provide: PG_CLIENT,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>): Sql => {
+        const cfg = config.get('database', { infer: true });
+        return postgres({
+          host: cfg.host,
+          port: cfg.port,
+          user: cfg.username,
+          password: cfg.password,
+          database: cfg.database,
+          max: 10,
+          idle_timeout: 20,
+          connect_timeout: 10,
+        });
+      },
+    },
+    {
+      provide: DRIZZLE,
+      inject: [PG_CLIENT],
+      useFactory: (client: Sql): Database =>
+        drizzle(client, { schema, casing: 'snake_case' }),
+    },
+  ],
+  exports: [DRIZZLE],
+})
+export class DatabaseModule implements OnModuleDestroy {
+  constructor(@Inject(PG_CLIENT) private readonly client: Sql) {}
+
+  async onModuleDestroy(): Promise<void> {
+    await this.client.end({ timeout: 5 });
+  }
+}

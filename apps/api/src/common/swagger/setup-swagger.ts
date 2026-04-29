@@ -20,9 +20,7 @@ export function setupSwagger(
   const swagger = config.get('swagger', { infer: true });
   if (!swagger.enabled) return null;
 
-  const builder = new DocumentBuilder()
-    .setTitle('spacedb API')
-    .build();
+  const builder = new DocumentBuilder().setTitle('spacedb API').build();
 
   const document = SwaggerModule.createDocument(app, builder);
   const path = swagger.path;

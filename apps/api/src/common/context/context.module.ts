@@ -1,6 +1,14 @@
 import { Global, Module } from '@nestjs/common';
+import { ClsPluginTransactional } from '@nestjs-cls/transactional';
+import { TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-adapter-drizzle-orm';
 import type { Request } from 'express';
 import { ClsModule, type ClsService, type ClsStore } from 'nestjs-cls';
+
+import {
+  DatabaseModule,
+  DRIZZLE,
+  type Database,
+} from '../../database/database.module';
 
 export interface RequestContext extends ClsStore {
   correlationId: string;
@@ -28,8 +36,16 @@ export interface RequestContext extends ClsStore {
           ctx.set('userAgent', req.headers['user-agent']);
         },
       },
+      plugins: [
+        new ClsPluginTransactional({
+          imports: [DatabaseModule],
+          adapter: new TransactionalAdapterDrizzleOrm<Database>({
+            drizzleInstanceToken: DRIZZLE,
+          }),
+        }),
+      ],
     }),
   ],
   exports: [ClsModule],
 })
-export class CorrelationModule {}
+export class ContextModule {}

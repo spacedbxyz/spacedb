@@ -6,12 +6,15 @@ import {
   HealthCheckService,
 } from '@nestjs/terminus';
 
+import { DatabaseHealthIndicator } from './database.health';
+
 @ApiTags('Health')
 @Controller('health')
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
     private readonly disk: DiskHealthIndicator,
+    private readonly database: DatabaseHealthIndicator,
   ) {}
 
   @Get()
@@ -22,6 +25,7 @@ export class HealthController {
     return this.health.check([
       () =>
         this.disk.checkStorage('disk', { path: '/', thresholdPercent: 0.9 }),
+      () => this.database.pingCheck(),
     ]);
   }
 
@@ -39,6 +43,7 @@ export class HealthController {
     return this.health.check([
       () =>
         this.disk.checkStorage('disk', { path: '/', thresholdPercent: 0.9 }),
+      () => this.database.pingCheck(),
     ]);
   }
 }

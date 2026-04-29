@@ -39,6 +39,28 @@
     "fix": {
       "cache": false,
       "dependsOn": ["format", "lint", "check-types"]
+    },
+    "db:generate": {
+      "cache": false,
+      "interactive": true,
+      "persistent": false
+    },
+    "db:migrate": {
+      "cache": false,
+      "interactive": true,
+      "persistent": false
+    },
+    "db:push": {
+      "cache": false,
+      "interactive": true,
+      "persistent": false
+    },
+    "db:studio": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:run-migrations": {
+      "cache": false
     }
   }
 }
