@@ -7,6 +7,10 @@ import { contract, type ContractRouterClient } from '@spacedb/contract';
 export default defineNuxtPlugin(() => {
   const link = new OpenAPILink(contract, {
     url: `${window.location.origin}/api`,
+    headers: () => {
+      const accessToken = useState<string | null>('auth.accessToken').value;
+      return accessToken ? { authorization: `Bearer ${accessToken}` } : {};
+    },
     fetch: (req, init) =>
       globalThis.fetch(req, { ...init, credentials: 'include' }),
   });
@@ -14,7 +18,5 @@ export default defineNuxtPlugin(() => {
   const client: JsonifiedClient<ContractRouterClient<typeof contract>> =
     createORPCClient(link);
 
-  return {
-    provide: { client },
-  };
+  return { provide: { client } };
 });

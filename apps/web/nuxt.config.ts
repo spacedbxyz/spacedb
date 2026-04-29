@@ -14,8 +14,8 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         '@orpc/client',
-        '@orpc/contract',
         '@orpc/openapi-client/fetch',
+        '@orpc/contract',
         'zod',
       ],
     },
