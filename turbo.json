@@ -17,7 +17,7 @@
       "cache": false
     },
     "lint:check": {
-      "dependsOn": ["^lint:check"],
+      "dependsOn": ["^build", "^lint:check"],
       "inputs": ["$TURBO_DEFAULT$", "eslint.config.*", ".eslintrc*"],
       "outputs": []
     },
@@ -29,7 +29,7 @@
       "outputs": []
     },
     "check-types": {
-      "dependsOn": ["^check-types"],
+      "dependsOn": ["^build", "^check-types"],
       "inputs": ["$TURBO_DEFAULT$", "tsconfig*.json"],
       "outputs": []
     },
