@@ -28,7 +28,7 @@ import type { IssuedTokens, Principal } from './auth.types';
 type Env = { auth: ConfigType<typeof authConfig> };
 
 export const REFRESH_COOKIE_NAME = 'spacedb_refresh';
-export const REFRESH_COOKIE_PATH = '/api/auth/refresh';
+export const REFRESH_COOKIE_PATH = '/';
 
 const SCRYPT_KEY_LENGTH = 64;
 const SCRYPT_SALT_LENGTH = 16;

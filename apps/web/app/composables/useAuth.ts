@@ -1,61 +1,112 @@
 import type { UserPublic } from '@spacedb/contract';
 
-let inflight: Promise<boolean> | null = null;
+interface AuthState {
+  user: UserPublic | null;
+  accessToken: string | null;
+  accessTokenExpiresAt: number | null;
+}
+
+const REFRESH_SKEW_MS = 30_000;
+
+let inflightRefresh: Promise<boolean> | null = null;
 
 export function useAuth() {
-  const client = useNuxtApp().$client;
-  const user = useState<UserPublic | null>('auth.user', () => null);
-  const accessToken = useState<string | null>('auth.accessToken', () => null);
+  const state = useState<AuthState>('auth', () => ({
+    user: null,
+    accessToken: null,
+    accessTokenExpiresAt: null,
+  }));
 
-  async function login(email: string, password: string) {
-    const r = await client.auth.login({ email, password });
-    user.value = r.user;
-    accessToken.value = r.accessToken;
+  const client = () => useNuxtApp().$client;
+
+  const isAuthenticated = computed(() => state.value.user !== null);
+  const user = computed(() => state.value.user);
+  const accessToken = computed(() => state.value.accessToken);
+
+  function setSession(session: {
+    user: UserPublic;
+    accessToken: string;
+    expiresIn: number;
+  }): void {
+    state.value = {
+      user: session.user,
+      accessToken: session.accessToken,
+      accessTokenExpiresAt: Date.now() + session.expiresIn * 1000,
+    };
+  }
+
+  function clearSession(): void {
+    state.value = {
+      user: null,
+      accessToken: null,
+      accessTokenExpiresAt: null,
+    };
+  }
+
+  function isAccessTokenFresh(): boolean {
+    const exp = state.value.accessTokenExpiresAt;
+    return exp !== null && exp - Date.now() > REFRESH_SKEW_MS;
+  }
+
+  async function login(email: string, password: string): Promise<void> {
+    setSession(await client().auth.login({ email, password }));
   }
 
   async function register(
     email: string,
     password: string,
     displayName: string,
-  ) {
-    const r = await client.auth.register({ email, password, displayName });
-    user.value = r.user;
-    accessToken.value = r.accessToken;
+  ): Promise<void> {
+    setSession(await client().auth.register({ email, password, displayName }));
   }
 
-  async function refresh(): Promise<boolean> {
-    if (inflight) return inflight;
-    inflight = (async () => {
-      try {
-        const r = await client.auth.refresh({});
-        user.value = r.user;
-        accessToken.value = r.accessToken;
-        return true;
-      } catch {
-        user.value = null;
-        accessToken.value = null;
-        return false;
-      } finally {
-        inflight = null;
-      }
-    })();
-    return inflight;
+  function refresh(): Promise<boolean> {
+    if (inflightRefresh) return inflightRefresh;
+    inflightRefresh = client()
+      .auth.refresh({})
+      .then(
+        (session) => {
+          setSession(session);
+          return true;
+        },
+        () => {
+          clearSession();
+          return false;
+        },
+      )
+      .finally(() => {
+        inflightRefresh = null;
+      });
+    return inflightRefresh;
   }
 
-  async function logout() {
-    await client.auth.logout({});
-    user.value = null;
-    accessToken.value = null;
+  async function logout(): Promise<void> {
+    await client()
+      .auth.logout({})
+      .catch(() => null);
+    clearSession();
   }
 
   async function fetchMe(): Promise<boolean> {
-    try {
-      user.value = await client.auth.me();
-      return true;
-    } catch {
-      return false;
-    }
+    const me = await client()
+      .auth.me()
+      .catch(() => null);
+    if (!me) return false;
+    state.value = { ...state.value, user: me };
+    return true;
   }
 
-  return { user, accessToken, login, register, refresh, logout, fetchMe };
+  return {
+    user,
+    accessToken,
+    isAuthenticated,
+    isAccessTokenFresh,
+    login,
+    register,
+    refresh,
+    logout,
+    fetchMe,
+    setSession,
+    clearSession,
+  };
 }

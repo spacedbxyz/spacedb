@@ -1,5 +1,5 @@
 {
-  "id": "c7691a4a-3238-4515-a9fc-7a7cfe5a3ac7",
+  "id": "f619a08e-89cc-4563-b447-8b088da8bf74",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -17,19 +17,19 @@
         },
         "email": {
           "name": "email",
-          "type": "text",
+          "type": "varchar(320)",
           "primaryKey": false,
           "notNull": true
         },
         "password_hash": {
           "name": "password_hash",
-          "type": "text",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
         },
         "display_name": {
           "name": "display_name",
-          "type": "text",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
@@ -40,6 +40,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'user'"
+        },
+        "last_login_at": {
+          "name": "last_login_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -91,6 +97,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "family_id": {
+          "name": "family_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "user_id": {
           "name": "user_id",
           "type": "uuid",
@@ -99,7 +111,7 @@
         },
         "token_hash": {
           "name": "token_hash",
-          "type": "text",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
         },
@@ -115,12 +127,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "replaced_by_id": {
-          "name": "replaced_by_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -130,11 +136,17 @@
         }
       },
       "indexes": {
-        "refresh_tokens_user_id_idx": {
-          "name": "refresh_tokens_user_id_idx",
+        "refresh_tokens_family_id_revoked_at_idx": {
+          "name": "refresh_tokens_family_id_revoked_at_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "family_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "revoked_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -145,11 +157,11 @@
           "method": "btree",
           "with": {}
         },
-        "refresh_tokens_token_hash_idx": {
-          "name": "refresh_tokens_token_hash_idx",
+        "refresh_tokens_user_id_idx": {
+          "name": "refresh_tokens_user_id_idx",
           "columns": [
             {
-              "expression": "token_hash",
+              "expression": "user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -177,7 +189,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "refresh_tokens_tokenHash_unique": {
+          "name": "refresh_tokens_tokenHash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
