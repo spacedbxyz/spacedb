@@ -1,6 +1,16 @@
-import { Global, Inject, Module, type OnModuleDestroy } from '@nestjs/common';
+import { join } from 'node:path';
+
+import {
+  Global,
+  Inject,
+  Logger,
+  Module,
+  type OnApplicationBootstrap,
+  type OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService, type ConfigType } from '@nestjs/config';
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres, { type Sql } from 'postgres';
 
 import type databaseConfig from '../config/database.config';
@@ -13,6 +23,8 @@ export const PG_CLIENT = Symbol('PG_CLIENT');
 export type Database = PostgresJsDatabase<typeof schema>;
 
 type Env = { database: ConfigType<typeof databaseConfig> };
+
+const MIGRATIONS_FOLDER = join(__dirname, 'migrations');
 
 @Global()
 @Module({
@@ -43,8 +55,25 @@ type Env = { database: ConfigType<typeof databaseConfig> };
   ],
   exports: [DRIZZLE],
 })
-export class DatabaseModule implements OnModuleDestroy {
-  constructor(@Inject(PG_CLIENT) private readonly client: Sql) {}
+export class DatabaseModule implements OnApplicationBootstrap, OnModuleDestroy {
+  private readonly logger = new Logger(DatabaseModule.name);
+
+  constructor(
+    @Inject(PG_CLIENT) private readonly client: Sql,
+    @Inject(DRIZZLE) private readonly db: Database,
+    private readonly config: ConfigService<Env, true>,
+  ) {}
+
+  async onApplicationBootstrap(): Promise<void> {
+    const cfg = this.config.get('database', { infer: true });
+    if (!cfg.autoMigrate) {
+      this.logger.log('Auto-migrate disabled, skipping migrations');
+      return;
+    }
+    this.logger.log(`Running migrations from ${MIGRATIONS_FOLDER}`);
+    await migrate(this.db, { migrationsFolder: MIGRATIONS_FOLDER });
+    this.logger.log('Migrations applied');
+  }
 
   async onModuleDestroy(): Promise<void> {
     await this.client.end({ timeout: 5 });

@@ -16,10 +16,9 @@ export class HealthController {
 
   @Implement(contract.health.ping)
   ping() {
-    return implement(contract.health.ping).handler(({ context }) => ({
+    return implement(contract.health.ping).handler(() => ({
       ok: true as const,
       ts: Date.now(),
-      correlationId: context.correlationId,
     }));
   }
 
@@ -36,17 +35,6 @@ export class HealthController {
       this.health.check([
         () =>
           this.disk.checkStorage('disk', { path: '/', thresholdPercent: 0.9 }),
-        () => this.database.pingCheck(),
-      ]),
-    );
-  }
-
-  @Implement(contract.health.check)
-  check() {
-    return implement(contract.health.check).handler(() =>
-      this.health.check([
-        () =>
-          this.disk.checkStorage('disk', { path: '/', thresholdPercent: 0.99 }),
         () => this.database.pingCheck(),
       ]),
     );

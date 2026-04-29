@@ -1,5 +1,12 @@
-import { Expose } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsString, Max, Min } from 'class-validator';
+import { Expose, Transform } from 'class-transformer';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 import { defineConfig } from './define-config';
 
@@ -29,6 +36,15 @@ class DatabaseConfig {
   @IsString()
   @IsNotEmpty()
   database!: string;
+
+  @Expose({ name: 'API_DATABASE_AUTO_MIGRATE' })
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') return value.toLowerCase() === 'true';
+    return true;
+  })
+  @IsBoolean()
+  autoMigrate: boolean = true;
 }
 
 export default defineConfig('database', DatabaseConfig);

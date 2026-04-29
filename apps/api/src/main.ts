@@ -7,6 +7,7 @@ import { ConfigService, type ConfigType } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { useContainer } from 'class-validator';
+import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -43,6 +44,8 @@ async function bootstrap(): Promise<void> {
   });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  app.use(cookieParser());
 
   const config = app.get<ConfigService<AppEnv, true>>(ConfigService);
   app.useLogger(
