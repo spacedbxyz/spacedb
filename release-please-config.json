@@ -8,7 +8,7 @@
   "separate-pull-requests": false,
   "packages": {
     ".": {
-      "package-name": "spacedb",
+      "component": "",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         { "type": "json", "path": "apps/api/package.json", "jsonpath": "$.version" },
