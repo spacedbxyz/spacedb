@@ -1,15 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  DiskHealthIndicator,
-  HealthCheck,
-  HealthCheckService,
-} from '@nestjs/terminus';
+import { Controller } from '@nestjs/common';
+import { DiskHealthIndicator, HealthCheckService } from '@nestjs/terminus';
+import { Implement, implement } from '@orpc/nest';
+
+import { contract } from '@spacedb/contract';
 
 import { DatabaseHealthIndicator } from './database.health';
 
-@ApiTags('Health')
-@Controller('health')
+@Controller()
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
@@ -17,33 +14,41 @@ export class HealthController {
     private readonly database: DatabaseHealthIndicator,
   ) {}
 
-  @Get()
-  @HealthCheck()
-  @ApiOperation({ summary: 'Health Check' })
-  @ApiResponse({ status: 200, description: 'Health check result' })
-  check() {
-    return this.health.check([
-      () =>
-        this.disk.checkStorage('disk', { path: '/', thresholdPercent: 0.9 }),
-      () => this.database.pingCheck(),
-    ]);
+  @Implement(contract.health.ping)
+  ping() {
+    return implement(contract.health.ping).handler(({ context }) => ({
+      ok: true as const,
+      ts: Date.now(),
+      correlationId: context.correlationId,
+    }));
   }
 
-  @Get('liveness')
-  @HealthCheck()
-  @ApiOperation({ summary: 'Liveness probe' })
+  @Implement(contract.health.liveness)
   liveness() {
-    return this.health.check([]);
+    return implement(contract.health.liveness).handler(() =>
+      this.health.check([]),
+    );
   }
 
-  @Get('readiness')
-  @HealthCheck()
-  @ApiOperation({ summary: 'Readiness probe' })
+  @Implement(contract.health.readiness)
   readiness() {
-    return this.health.check([
-      () =>
-        this.disk.checkStorage('disk', { path: '/', thresholdPercent: 0.9 }),
-      () => this.database.pingCheck(),
-    ]);
+    return implement(contract.health.readiness).handler(() =>
+      this.health.check([
+        () =>
+          this.disk.checkStorage('disk', { path: '/', thresholdPercent: 0.9 }),
+        () => this.database.pingCheck(),
+      ]),
+    );
+  }
+
+  @Implement(contract.health.check)
+  check() {
+    return implement(contract.health.check).handler(() =>
+      this.health.check([
+        () =>
+          this.disk.checkStorage('disk', { path: '/', thresholdPercent: 0.99 }),
+        () => this.database.pingCheck(),
+      ]),
+    );
   }
 }

@@ -10,14 +10,14 @@ import { useContainer } from 'class-validator';
 
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { setupSwagger } from './common/swagger/setup-swagger';
+import { setupOpenApi } from './common/openapi/setup-openapi';
 import type appConfig from './config/app.config';
 import { LogLevel } from './config/app.config';
-import type swaggerConfig from './config/swagger.config';
+import type openapiConfig from './config/openapi.config';
 
 type AppEnv = {
   app: ConfigType<typeof appConfig>;
-  swagger: ConfigType<typeof swaggerConfig>;
+  openapi: ConfigType<typeof openapiConfig>;
 };
 
 const LOG_LEVEL_ORDER: NestLogLevel[] = [
@@ -39,6 +39,7 @@ async function bootstrap(): Promise<void> {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: getEnabledLogLevels(initialLevel),
+    bodyParser: false,
   });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
@@ -64,7 +65,11 @@ async function bootstrap(): Promise<void> {
 
   app.useGlobalFilters(new GlobalExceptionFilter(app.get(HttpAdapterHost)));
 
-  const swaggerPath = setupSwagger(app, config);
+  const openapi = config.get('openapi', { infer: true });
+  const docsPath = await setupOpenApi(app, {
+    enabled: openapi.enabled,
+    path: openapi.path,
+  });
 
   app.enableShutdownHooks();
 
@@ -73,8 +78,8 @@ async function bootstrap(): Promise<void> {
   await app.listen(port, host);
 
   const url = await app.getUrl();
-  if (swaggerPath) {
-    logger.log(`API documentation available at: ${url}/${swaggerPath}`);
+  if (docsPath) {
+    logger.log(`API documentation available at: ${url}/${docsPath}`);
   }
   logger.log(`Application is running on: ${url}`);
 }

@@ -8,7 +8,17 @@ export default defineNuxtConfig({
     port: Number(process.env.WEB_PORT) || 3001,
   },
   runtimeConfig: {
-    apiBase: process.env.WEB_API_BASE,
+    apiBase: process.env.WEB_API_BASE || 'http://localhost:3000',
+  },
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@orpc/client',
+        '@orpc/contract',
+        '@orpc/openapi-client/fetch',
+        'zod',
+      ],
+    },
   },
   eslint: {
     config: {
