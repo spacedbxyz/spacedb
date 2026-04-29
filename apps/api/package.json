@@ -1,6 +1,9 @@
 {
   "name": "@spacedb/api",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "build": "nest build",
     "dev": "nest start --watch",
@@ -15,8 +18,16 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.1.19",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.19",
     "@nestjs/platform-express": "^11.1.19",
+    "@nestjs/swagger": "^11.4.2",
+    "@nestjs/terminus": "^11.1.1",
+    "@scalar/nestjs-api-reference": "^1.1.11",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "js-yaml": "^4.1.1",
+    "nestjs-cls": "^6.2.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -28,7 +39,8 @@
     "@nestjs/testing": "^11.1.19",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.12.2",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "25.6.0",
     "@types/supertest": "^7.2.0",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",

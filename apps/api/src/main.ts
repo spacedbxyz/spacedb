@@ -1,11 +1,81 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import {
+  type LogLevel as NestLogLevel,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
+import { ConfigService, type ConfigType } from '@nestjs/config';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { useContainer } from 'class-validator';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(
-    process.env.API_PORT ?? 3000,
-    process.env.API_HOST ?? '0.0.0.0',
+import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { setupSwagger } from './common/swagger/setup-swagger';
+import type appConfig from './config/app.config';
+import { LogLevel } from './config/app.config';
+import type swaggerConfig from './config/swagger.config';
+
+type AppEnv = {
+  app: ConfigType<typeof appConfig>;
+  swagger: ConfigType<typeof swaggerConfig>;
+};
+
+const LOG_LEVEL_ORDER: NestLogLevel[] = [
+  'fatal',
+  'error',
+  'warn',
+  'log',
+  'debug',
+  'verbose',
+];
+
+function getEnabledLogLevels(level: LogLevel): NestLogLevel[] {
+  return LOG_LEVEL_ORDER.slice(0, LOG_LEVEL_ORDER.indexOf(level) + 1);
+}
+
+async function bootstrap(): Promise<void> {
+  const logger = new Logger('Bootstrap');
+  const initialLevel = (process.env.API_LOG_LEVEL as LogLevel) || LogLevel.Log;
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: getEnabledLogLevels(initialLevel),
+  });
+
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  const config = app.get<ConfigService<AppEnv, true>>(ConfigService);
+  app.useLogger(
+    getEnabledLogLevels(config.get('app.logLevel', { infer: true })),
   );
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidUnknownValues: true,
+    }),
+  );
+
+  app.enableCors({
+    origin: true,
+    credentials: true,
+    exposedHeaders: ['Content-Disposition'],
+  });
+
+  app.useGlobalFilters(new GlobalExceptionFilter(app.get(HttpAdapterHost)));
+
+  const swaggerPath = setupSwagger(app, config);
+
+  app.enableShutdownHooks();
+
+  const port = config.get('app.port', { infer: true });
+  const host = config.get('app.host', { infer: true });
+  await app.listen(port, host);
+
+  const url = await app.getUrl();
+  if (swaggerPath) {
+    logger.log(`API documentation available at: ${url}/${swaggerPath}`);
+  }
+  logger.log(`Application is running on: ${url}`);
 }
 void bootstrap();
