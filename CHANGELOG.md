@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/spacedbxyz/spacedb/compare/v1.0.0...v1.0.1) (2026-04-29)
+
+
+### Documentation
+
+* env example default auto migrate ([b1cf91c](https://github.com/spacedbxyz/spacedb/commit/b1cf91ce19223c4aafa1e45dbcd7dd0c5636aae3))
+
 ## 1.0.0 (2026-04-29)
 
 
