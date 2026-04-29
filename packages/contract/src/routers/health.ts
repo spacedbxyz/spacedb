@@ -1,50 +1,41 @@
-import { oc } from "@orpc/contract";
-import { z } from "zod";
-
-const checkResultSchema = z.object({
-  status: z.enum(["ok", "error", "shutting_down"]),
-  info: z.record(z.string(), z.any()).optional(),
-  error: z.record(z.string(), z.any()).optional(),
-  details: z.record(z.string(), z.any()),
-});
+import { oc } from "../builder.ts";
+import {
+  healthCheckOutputSchema,
+  pingOutputSchema,
+} from "../schemas/health.ts";
 
 export const healthContract = {
   ping: oc
     .route({
       method: "GET",
       path: "/health/ping",
-      summary: "Ping",
-      tags: ["health"],
+      summary: "Liveness ping with server timestamp",
+      tags: ["Health"],
+      operationId: "healthPing",
     })
-    .output(
-      z.object({
-        ok: z.literal(true),
-        ts: z.number().int(),
-        correlationId: z.string().uuid(),
-      }),
-    ),
+    .output(pingOutputSchema),
+
   liveness: oc
     .route({
       method: "GET",
       path: "/health/liveness",
       summary: "Liveness probe",
-      tags: ["health"],
+      description: "Returns ok as long as the process is running.",
+      tags: ["Health"],
+      operationId: "healthLiveness",
     })
-    .output(checkResultSchema),
+    .output(healthCheckOutputSchema),
+
   readiness: oc
     .route({
       method: "GET",
       path: "/health/readiness",
       summary: "Readiness probe",
-      tags: ["health"],
+      description:
+        "Verifies downstream dependencies (database, disk) are reachable.",
+      tags: ["Health"],
+      operationId: "healthReadiness",
     })
-    .output(checkResultSchema),
-  check: oc
-    .route({
-      method: "GET",
-      path: "/health/check",
-      summary: "Aggregate health check",
-      tags: ["health"],
-    })
-    .output(checkResultSchema),
-};
+    .output(healthCheckOutputSchema),
+} as const;
+export type HealthContract = typeof healthContract;

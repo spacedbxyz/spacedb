@@ -28,8 +28,6 @@
   "dependencies": {
     "@orpc/client": "^1.14.0",
     "@orpc/contract": "^1.14.0",
-    "drizzle-orm": "^0.45.2",
-    "drizzle-zod": "^0.8.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {
