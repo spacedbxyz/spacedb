@@ -1,6 +1,6 @@
 {
   "name": "spacedb",
-  "version": "1.0.1",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -12,6 +12,7 @@
     "check-types": "turbo run check-types",
     "check": "turbo run check",
     "fix": "turbo run fix",
+    "test": "turbo run test",
     "db:generate": "dotenv -e .env -- turbo run db:generate --filter=@spacedb/api",
     "db:migrate": "dotenv -e .env -- turbo run db:migrate --filter=@spacedb/api",
     "db:push": "dotenv -e .env -- turbo run db:push --filter=@spacedb/api",

@@ -36,6 +36,12 @@
     "check": {
       "dependsOn": ["format:check", "lint:check"]
     },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "vitest.config.ts"],
+      "outputs": ["coverage/**"],
+      "cache": false
+    },
     "fix": {
       "cache": false,
       "dependsOn": ["format", "lint", "check-types"]

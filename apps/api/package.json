@@ -1,6 +1,6 @@
 {
   "name": "@spacedb/api",
-  "version": "1.0.1",
+  "version": "0.0.0",
   "private": true,
   "engines": {
     "node": ">=24"
@@ -16,6 +16,9 @@
     "check-types": "tsc --noEmit -p tsconfig.json",
     "check": "pnpm format:check && pnpm lint:check",
     "fix": "pnpm format && pnpm lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -37,8 +40,8 @@
     "@scalar/nestjs-api-reference": "^1.1.11",
     "@spacedb/contract": "workspace:^",
     "class-transformer": "^0.5.1",
-    "cookie-parser": "^1.4.7",
     "class-validator": "^0.15.1",
+    "cookie-parser": "^1.4.7",
     "drizzle-orm": "^0.45.2",
     "js-yaml": "^4.1.1",
     "nestjs-cls": "^6.2.0",
@@ -53,44 +56,30 @@
     "@nestjs/cli": "^11.0.21",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.1.19",
-    "@types/express": "^5.0.6",
+    "@swc/core": "^1.15.33",
+    "@testcontainers/postgresql": "^11.10.0",
     "@types/cookie-parser": "^1.4.9",
-    "@types/jest": "^30.0.0",
+    "@types/express": "^5.0.6",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.6.0",
     "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.5",
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.5.0",
-    "jest": "^30.3.0",
     "prettier": "^3.8.3",
     "source-map-support": "^0.5.21",
     "supertest": "^7.2.2",
-    "ts-jest": "^29.4.9",
+    "testcontainers": "^11.10.0",
     "ts-loader": "^9.5.7",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.1"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "typescript-eslint": "^8.59.1",
+    "unplugin-swc": "^1.5.9",
+    "vitest": "^4.1.5"
   }
 }
