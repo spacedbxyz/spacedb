@@ -21,21 +21,23 @@
     "fix": "pnpm format && pnpm lint"
   },
   "dependencies": {
-    "@orpc/client": "^1.14.0",
-    "@orpc/openapi": "^1.14.0",
-    "@orpc/openapi-client": "^1.14.0",
-    "@orpc/server": "^1.14.0",
+    "@nuxt/ui": "^4.7.1",
+    "@orpc/client": "^1.14.2",
+    "@orpc/openapi": "^1.14.2",
+    "@orpc/openapi-client": "^1.14.2",
+    "@orpc/server": "^1.14.2",
     "@spacedb/contract": "workspace:^",
-    "nuxt": "^4.4.2",
-    "vue": "^3.5.33",
+    "nuxt": "^4.4.4",
+    "tailwindcss": "^4.2.4",
+    "vue": "^3.5.34",
     "vue-router": "^5.0.6"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.15.2",
-    "eslint": "^10.2.1",
+    "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
-    "vue-tsc": "^3.2.7"
+    "vue-tsc": "^3.2.8"
   }
 }
