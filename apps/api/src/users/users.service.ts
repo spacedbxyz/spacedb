@@ -7,7 +7,7 @@ import { desc, eq, sql } from 'drizzle-orm';
 import type { UserRole } from '@spacedb/contract';
 
 import type { Database } from '../database/database.module';
-import { type User, users } from '../database/schema/users';
+import { type User, users } from '../database/schema';
 
 const isUniqueViolation = (e: unknown): boolean =>
   typeof e === 'object' &&
@@ -101,16 +101,14 @@ export class UsersService {
     const values: Record<string, unknown> = { ...patch, updatedAt: new Date() };
     if (typeof values.email === 'string')
       values.email = values.email.toLowerCase();
+    let row: User | undefined;
     try {
-      const [row] = await this.txHost.tx
+      [row] = await this.txHost.tx
         .update(users)
         .set(values)
         .where(eq(users.id, id))
         .returning();
-      if (!row) throw new ORPCError('NOT_FOUND', { message: 'User not found' });
-      return row;
     } catch (e) {
-      if (e instanceof ORPCError) throw e;
       if (isUniqueViolation(e)) {
         throw new ORPCError('CONFLICT', {
           message: 'Email already registered',
@@ -118,6 +116,8 @@ export class UsersService {
       }
       throw e;
     }
+    if (!row) throw new ORPCError('NOT_FOUND', { message: 'User not found' });
+    return row;
   }
 
   async remove(id: string): Promise<void> {

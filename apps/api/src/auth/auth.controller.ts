@@ -7,7 +7,7 @@ import { UsersService } from '../users/users.service';
 
 import { AuthService, REFRESH_COOKIE_NAME } from './auth.service';
 import type { IssuedTokens } from './auth.types';
-import type { User } from '../database/schema/users';
+import type { User } from '../database/schema';
 
 @Controller()
 export class AuthController {
