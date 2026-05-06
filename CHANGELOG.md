@@ -1,0 +1,32 @@
+# Changelog
+
+## 1.0.0 (2026-05-06)
+
+
+### Features
+
+* **api:** user and auth module ([ea0ec4a](https://github.com/spacedbxyz/spacedb/commit/ea0ec4aa12a637f85256d388d5e7df29cda01bca))
+* init nuxt/ui ([95c886c](https://github.com/spacedbxyz/spacedb/commit/95c886ca177db65757685eea8920680dd2475fe6))
+* **web:** demo integration of user and auth api ([17641c9](https://github.com/spacedbxyz/spacedb/commit/17641c93968e40073e00c9c6cf42bba3fe53d335))
+
+
+### Bug Fixes
+
+* some warnings ([dc39d51](https://github.com/spacedbxyz/spacedb/commit/dc39d51e4784b86b493eedbc566bc76827c42340))
+* **web:** persistent auth ([f82e5ce](https://github.com/spacedbxyz/spacedb/commit/f82e5cecc0efda3122e8adb4dcfff323a52d01ad))
+
+
+### Reverts
+
+* release 0.0.0 ([d9af47d](https://github.com/spacedbxyz/spacedb/commit/d9af47dfe1a5db637687d0c1693caff0bee2cf10))
+* release 1.0.0 ([41fe50f](https://github.com/spacedbxyz/spacedb/commit/41fe50f4233919c61fde7d4fe2e16ac4992ad0bd))
+
+
+### Code Refactoring
+
+* changelog ([b968e8f](https://github.com/spacedbxyz/spacedb/commit/b968e8f6ca089631d7a21cbe6a96764d5235fe70))
+
+
+### Documentation
+
+* env example default auto migrate ([b1cf91c](https://github.com/spacedbxyz/spacedb/commit/b1cf91ce19223c4aafa1e45dbcd7dd0c5636aae3))
